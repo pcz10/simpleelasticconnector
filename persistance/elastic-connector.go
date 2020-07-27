@@ -1,21 +1,23 @@
 package persistance
 
-import(
+import (
 	"context"
 	"encoding/json"
-	models "todo/model"
-	"github.com/olivere/elastic"
 	"fmt"
+	models "todo/model"
+
+	"github.com/olivere/elastic"
 )
 
 type Manager interface {
-	FindAll() 			   []byte
+	FindAll() []byte
 	Add(note *models.Note) error
 }
 
 type DBmanager struct {
 	client *elastic.Client
 }
+
 var ElasticClient = initializeESCClient()
 
 func GetElasticClient() DBmanager {
@@ -24,8 +26,8 @@ func GetElasticClient() DBmanager {
 
 func initializeESCClient() DBmanager {
 	elasticClient, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"),
-	elastic.SetSniff(false),
-	elastic.SetHealthcheck(false))
+		elastic.SetSniff(false),
+		elastic.SetHealthcheck(false))
 	if err != nil {
 		panic("err")
 	} else {
@@ -43,7 +45,7 @@ func (elasticClient DBmanager) FindAll() []models.Note {
 		fmt.Println("Search error. Err=", err)
 	}
 	for _, hit := range searchResult.Hits.Hits {
-		var note models.Note 
+		var note models.Note
 		err := json.Unmarshal(hit.Source, &note)
 		if err != nil {
 			fmt.Println("Unmarshall note error. Err=", err)
@@ -54,7 +56,7 @@ func (elasticClient DBmanager) FindAll() []models.Note {
 	return notes
 }
 
-func (elasticClient DBmanager) Add(note [] byte) error {
+func (elasticClient DBmanager) Add(note []byte) error {
 	ctx := context.Background()
 	data := string(note)
 	ind, err := elasticClient.client.Index().Index("notes").BodyJson(data).Do(ctx)
@@ -65,4 +67,3 @@ func (elasticClient DBmanager) Add(note [] byte) error {
 	fmt.Println("Insertion Successful", ind)
 	return nil
 }
-
