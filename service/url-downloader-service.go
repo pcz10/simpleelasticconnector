@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"time"
 	models "todo/model"
 )
 
@@ -24,13 +23,11 @@ func (downloader *URLDownloader) Run(urlChannel chan string, returnChannel chan 
 	for {
 		select {
 		case <-urlChannel:
-			fmt.Printf("Processing in: %v", downloader.GetId())
+			fmt.Printf("\nProcessing in: %v", downloader.GetId())
 			note := GetNoteService().GetFromUrl(<-urlChannel)
-			fmt.Printf("Note: %v", note)
+			fmt.Printf("\nNote: %v", note)
 			returnChannel <- note
 		default:
-			fmt.Printf("URLDownloader - waiting for input")
-			time.Sleep(50 * time.Millisecond)
 		}
 	}
 }
