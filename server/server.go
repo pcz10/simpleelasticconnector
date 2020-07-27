@@ -23,13 +23,6 @@ var downloaderWorker5 = services.URLDownloader{Id: "urlDownloader_5"}
 func Run() {
 	fmt.Printf("Starting server at port 8080\n")
 
-	router := mux.NewRouter()
-	router.HandleFunc("/", helloServer).Methods("GET")
-	router.HandleFunc("/get", getNotes).Methods("GET")
-	router.HandleFunc("/get/{id}", getNoteById).Methods("GET")
-	router.HandleFunc("/add", addNote).Methods("POST")
-	router.HandleFunc("/urls", getFromUrls).Methods("GET")
-
 	returnChannel1 := make(chan models.Note)
 	returnChannel2 := make(chan models.Note)
 	returnChannel3 := make(chan models.Note)
@@ -41,6 +34,14 @@ func Run() {
 	go downloaderWorker3.Run(informationChannel, returnChannel3)
 	go downloaderWorker4.Run(informationChannel, returnChannel4)
 	go downloaderWorker5.Run(informationChannel, returnChannel5)
+
+	router := mux.NewRouter()
+	router.HandleFunc("/", helloServer).Methods("GET")
+	router.HandleFunc("/get", getNotes).Methods("GET")
+	router.HandleFunc("/get/{id}", getNoteById).Methods("GET")
+	router.HandleFunc("/add", addNote).Methods("POST")
+	router.HandleFunc("/urls", getFromUrls).Methods("GET")
+
 
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal(err)

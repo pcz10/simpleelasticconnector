@@ -47,11 +47,13 @@ func (noteService *NoteService) GetFromUrl(url string) model.Note {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// log.Println("\nget from url URL: ", url)
 	data, _ := ioutil.ReadAll(res.Body)
 	var note model.Note
 	err1 := json.Unmarshal(data, &note)
 	if err1 != nil {
 		log.Println("Unmarshall note error. Err=", err1)
 	}
+	// log.Println("\nget from url note: ", note)
 	return note
 }
