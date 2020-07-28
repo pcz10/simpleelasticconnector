@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var informationChannel = make(chan string)
+var informationChannel = make(chan services.URLPerNoteDataModel)
 
 var downloaderWorker1 = services.URLDownloader{Id: "urlDownloader_1"}
 var downloaderWorker2 = services.URLDownloader{Id: "urlDownloader_2"}
@@ -23,17 +23,11 @@ var downloaderWorker5 = services.URLDownloader{Id: "urlDownloader_5"}
 func Run() {
 	fmt.Printf("Starting server at port 8080\n")
 
-	returnChannel1 := make(chan models.Note)
-	returnChannel2 := make(chan models.Note)
-	returnChannel3 := make(chan models.Note)
-	returnChannel4 := make(chan models.Note)
-	returnChannel5 := make(chan models.Note)
-
-	go downloaderWorker1.Run(informationChannel, returnChannel1)
-	go downloaderWorker2.Run(informationChannel, returnChannel2)
-	go downloaderWorker3.Run(informationChannel, returnChannel3)
-	go downloaderWorker4.Run(informationChannel, returnChannel4)
-	go downloaderWorker5.Run(informationChannel, returnChannel5)
+	go downloaderWorker1.Run(informationChannel)
+	go downloaderWorker2.Run(informationChannel)
+	go downloaderWorker3.Run(informationChannel)
+	go downloaderWorker4.Run(informationChannel)
+	go downloaderWorker5.Run(informationChannel)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", helloServer).Methods("GET")
@@ -56,8 +50,16 @@ func getFromUrls(w http.ResponseWriter, r *http.Request) {
 		"http://localhost:8080/get/11", "http://localhost:8080/get/21", "http://localhost:8080/get/31", "http://localhost:8080/get/41",
 		"http://localhost:8080/get/51", "http://localhost:8080/get/61", "http://localhost:8080/get/71", "http://localhost:8080/get/81",
 		"http://localhost:8080/get/91", "http://localhost:8080/get/101", "http://localhost:8080/get/111", "http://localhost:8080/get/121"}
+		
+	ch := make(chan models.Note)
 	for _, url := range urls {
-		informationChannel <- url
+		data := services.URLPerNoteDataModel {
+			URL: url,
+			ReturnChannel: ch,
+		}
+		informationChannel <- data
+		v := <-ch
+		fmt.Printf("\nRecieved note in return channel: %v ", v)
 	}
 }
 
